@@ -9,3 +9,11 @@ func EncryptPass(password string) ([]byte, error) {
 	}
 	return hash, nil
 }
+
+func DecryptPass(hash, password string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	if err != nil {
+		return err
+	}
+	return nil
+}
