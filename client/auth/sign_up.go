@@ -2,12 +2,11 @@ package auth
 
 import (
 	"AuthService/client/grpc"
+	encryption "AuthService/client/utils"
 	"fmt"
 	"log"
 	"net/http"
 	"text/template"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +34,7 @@ func GetUserDataSignUp(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
-	hash_pass, err := EncryptPass(password)
+	hash_pass, err := encryption.EncryptPass(password)
 	if err != nil {
 		log.Println(err)
 		return
@@ -47,12 +46,4 @@ func GetUserDataSignUp(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "http://localhost:8080", http.StatusSeeOther)
 
-}
-
-func EncryptPass(password string) ([]byte, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-	return hash, nil
 }
