@@ -1,9 +1,11 @@
 package db
 
 import (
+	encryption "AuthService/client/utils"
 	"database/sql"
-	_ "github.com/lib/pq"
 	"log"
+
+	_ "github.com/lib/pq"
 )
 
 type DbUsers struct {
@@ -33,7 +35,6 @@ func (d *DbUsers) AddUser(email, username, password string) error {
 		username, email,
 	).Scan(&exist)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
@@ -48,4 +49,24 @@ func (d *DbUsers) AddUser(email, username, password string) error {
 		return err
 	}
 	return nil
+}
+
+func (d *DbUsers) CheckUser(username, password string) error {
+	var hash_pass string
+	err := d.DB.QueryRow("SELECT password FROM users WHERE username=$1", username).Scan(&hash_pass)
+	if err == sql.ErrNoRows {
+		return err
+	} else if err != nil {
+		return err
+	}
+
+	// check password
+	err = encryption.DecryptPass(hash_pass, password)
+	if err != nil {
+		return err
+	}
+	return nil
+
+	// if nil, password is correct
+	// then, use this result in grpc server
 }
