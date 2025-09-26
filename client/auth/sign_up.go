@@ -3,7 +3,6 @@ package auth
 import (
 	"AuthService/client/grpc"
 	encryption "AuthService/client/utils"
-	"fmt"
 	"log"
 	"net/http"
 	"text/template"
@@ -40,10 +39,14 @@ func GetUserDataSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	status, message := grpc.SignUpGRPC(email, username, hash_pass)
+	response, token := grpc.SignUpGRPC(email, username, hash_pass)
 
-	fmt.Printf("GRPC said: %t, %s\n", status, message)
+	tmpl, err := template.ParseFiles("templates/response.html")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	http.Redirect(w, r, "http://localhost:8080", http.StatusSeeOther)
+	data := &ResponseData{Response: response, Token: token}
 
+	tmpl.Execute(w, data)
 }
