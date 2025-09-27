@@ -6,7 +6,6 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type DbUsers struct {
