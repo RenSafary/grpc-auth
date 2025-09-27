@@ -6,6 +6,7 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type DbUsers struct {
@@ -51,22 +52,19 @@ func (d *DbUsers) AddUser(email, username, password string) error {
 	return nil
 }
 
-func (d *DbUsers) CheckUser(username, password string) error {
+func (d *DbUsers) CheckUser(username, password string) (bool, error) {
 	var hash_pass string
 	err := d.DB.QueryRow("SELECT password FROM users WHERE username=$1", username).Scan(&hash_pass)
 	if err == sql.ErrNoRows {
-		return err
+		return false, nil
 	} else if err != nil {
-		return err
+		return false, err
 	}
 
-	// check password
 	err = encryption.DecryptPass(hash_pass, password)
 	if err != nil {
-		return err
+		return false, nil
 	}
-	return nil
 
-	// if nil, password is correct
-	// then, use this result in grpc server
+	return true, nil
 }
