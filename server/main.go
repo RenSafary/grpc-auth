@@ -24,6 +24,15 @@ func (s *AuthService) SignUp(ctx context.Context, req *pb.SignUpRequest) (*pb.Si
 	return &pb.SignUpResponse{Status: true, Token: "asdasdasd"}, nil
 }
 
+func (s *AuthService) SignIn(ctx context.Context, req *pb.SignInRequest) (*pb.SignInResponse, error) {
+	response, err := s.db.CheckUser(req.Username, req.Password)
+	if err != nil {
+		log.Println(response, err)
+		return &pb.SignInResponse{Status: false, Token: ""}, nil
+	}
+	return &pb.SignInResponse{Status: true, Token: "asdasdasd"}, nil
+}
+
 func main() {
 	usersDB, err := db.Conn()
 	if err != nil {
