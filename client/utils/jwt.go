@@ -5,6 +5,8 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"strings"
 )
 
 type Header struct {
@@ -19,6 +21,14 @@ type Payload struct {
 
 func base64UrlEncode(data []byte) string {
 	return base64.RawURLEncoding.EncodeToString(data)
+}
+
+func base64UrlDecode(data string) (string, error) {
+	decoded, err := base64.RawURLEncoding.DecodeString(data)
+	if err != nil {
+		return "", err
+	}
+	return string(decoded), nil
 }
 
 func CreateToken(username string) (string, error) {
@@ -53,6 +63,16 @@ func CreateToken(username string) (string, error) {
 	return token, nil
 }
 
-func GetPayload(token string) {
+func GetPayload(token string) (string, error) {
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return "", errors.New("invalid token format")
+	}
 
+	payload, err := base64UrlDecode(parts[1])
+	if err != nil {
+		return "", err
+	}
+
+	return payload, nil
 }
