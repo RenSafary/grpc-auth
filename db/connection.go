@@ -1,6 +1,7 @@
 package db
 
 import (
+	"AuthService/client/utils"
 	encryption "AuthService/client/utils"
 	"database/sql"
 	"fmt"
@@ -46,44 +47,59 @@ func Conn() (*DbUsers, error) {
 	return &DbUsers{DB: db}, nil
 }
 
-func (d *DbUsers) AddUser(email, username, password string) error {
-
+func (d *DbUsers) AddUser(username, password string) (string, error) {
 	// does user exist or not
 	var exist bool
 	err := d.DB.QueryRow(
-		"SELECT EXISTS(SELECT 1 FROM users WHERE username=$1 OR email=$2)",
-		username, email,
+		"SELECT EXISTS(SELECT 1 FROM users WHERE username=$1)",
+		username,
 	).Scan(&exist)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	if exist == false {
-		return err
+	if exist {
+		return "", fmt.Errorf("user already exists")
+	}
+
+	// hash password
+	hashPass, err := encryption.EncryptPass(password)
+	if err != nil {
+		return "", err
 	}
 
 	// add record
-	_, err = d.DB.Exec("INSERT INTO users (username, email, password) VALUES ($1, $2, $3)", username, email, password)
+	_, err = d.DB.Exec("INSERT INTO users (username, password) VALUES ($1, $2)", username, hashPass)
 	if err != nil {
-		log.Println(err)
-		return err
+		return "", err
 	}
-	return nil
+
+	token, err := utils.CreateToken(username)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
-func (d *DbUsers) CheckUser(username, password string) (bool, error) {
+func (d *DbUsers) CheckUser(username, password string) (string, error) {
 	var hash_pass string
 	err := d.DB.QueryRow("SELECT password FROM users WHERE username=$1", username).Scan(&hash_pass)
 	if err == sql.ErrNoRows {
-		return false, nil
+		return "", fmt.Errorf("user not found")
 	} else if err != nil {
-		return false, err
+		return "", err
 	}
 
 	err = encryption.DecryptPass(hash_pass, password)
 	if err != nil {
-		return false, nil
+		return "", fmt.Errorf("invalid password")
 	}
 
-	return true, nil
+	token, err := utils.CreateToken(username)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
