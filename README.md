@@ -2,6 +2,12 @@
 
 _Service for authentication and authorization made on gRPC_
 
+## Functional
+
+* Registration
+* Log-in
+* JWT token generation
+
 ## Stack of technologies
 
 * Go 1.24.2
@@ -46,8 +52,19 @@ go run server/main.go
 go run client/main.go
 ```
 
-## Functional
+## Environment variables
 
-* Registration
-* Log-in
-* JWT token generation
+### Database
+```
+DB_USER="YOUR_USERNAME"
+DB_PASSWORD="YOUR_PASSWORD"
+DB_NAME="YOUR_DB_NAME"
+DB_HOST="YOUR_HOST" 
+DB_PORT="YOUR_PORT" 
+DB_SSLMODE="disable"
+```
+
+### Json Web Token
+```
+SECRET_KEY="YOUR_SECRET_KEY"
+```

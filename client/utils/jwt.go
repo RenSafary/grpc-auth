@@ -6,7 +6,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"log"
+	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 type Header struct {
@@ -31,8 +35,17 @@ func base64UrlDecode(data string) (string, error) {
 	return string(decoded), nil
 }
 
+func GetSecretKey() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+	secret_key := os.Getenv("SECRET_KEY")
+	return secret_key
+}
+
 func CreateToken(username string) (string, error) {
-	secret := "2281337"
+	secret_key := GetSecretKey()
 
 	h := Header{Alg: "sha256", Type: "jwt"}
 	p := Payload{Sub: username, Exp: 6}
@@ -52,7 +65,7 @@ func CreateToken(username string) (string, error) {
 
 	message := encoded_header + "." + encoded_payload
 
-	hm := hmac.New(sha256.New, []byte(secret))
+	hm := hmac.New(sha256.New, []byte(secret_key))
 	hm.Write([]byte(message))
 	signature := hm.Sum(nil)
 
