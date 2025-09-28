@@ -16,21 +16,22 @@ type AuthService struct {
 }
 
 func (s *AuthService) SignUp(ctx context.Context, req *pb.SignUpRequest) (*pb.SignUpResponse, error) {
-	err := s.db.AddUser(req.Username, req.Email, req.Password)
+	token, err := s.db.AddUser(req.Username, req.Password)
 	if err != nil {
 		log.Println(err)
-		return &pb.SignUpResponse{Status: false, Token: ""}, nil
+		return &pb.SignUpResponse{Status: false, Token: "Couldn't create the account"}, nil
 	}
-	return &pb.SignUpResponse{Status: true, Token: "asdasdasd"}, nil
+	return &pb.SignUpResponse{Status: true, Token: token}, nil
 }
 
 func (s *AuthService) SignIn(ctx context.Context, req *pb.SignInRequest) (*pb.SignInResponse, error) {
-	response, err := s.db.CheckUser(req.Username, req.Password)
+	token, err := s.db.CheckUser(req.Username, req.Password)
 	if err != nil {
-		log.Println(response, err)
+		log.Println("SignIn error:", err)
 		return &pb.SignInResponse{Status: false, Token: ""}, nil
 	}
-	return &pb.SignInResponse{Status: true, Token: "asdasdasd"}, nil
+
+	return &pb.SignInResponse{Status: true, Token: token}, nil
 }
 
 func main() {
