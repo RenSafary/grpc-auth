@@ -2,7 +2,6 @@ package auth
 
 import (
 	"AuthService/client/grpc"
-	encryption "AuthService/client/utils"
 	"log"
 	"net/http"
 	"text/template"
@@ -29,17 +28,10 @@ func GetUserDataSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := r.FormValue("email")
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
-	hash_pass, err := encryption.EncryptPass(password)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	response, token := grpc.SignUpGRPC(email, username, hash_pass)
+	response, token := grpc.SignUpGRPC(username, []byte(password))
 
 	tmpl, err := template.ParseFiles("templates/response.html")
 	if err != nil {
@@ -47,6 +39,5 @@ func GetUserDataSignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := &ResponseData{Response: response, Token: token}
-
 	tmpl.Execute(w, data)
 }
