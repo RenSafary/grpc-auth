@@ -35,7 +35,6 @@ CREATE DATABASE authgrpc;
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username CHARACTER VARYING(50) NOT NULL,
-    email CHARACTER VARYING(100),
     password text NOT NULL
 );
 ```
