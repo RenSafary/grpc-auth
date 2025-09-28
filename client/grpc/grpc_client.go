@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func SignUpGRPC(email, username string, password []byte) (bool, string) {
+func SignUpGRPC(username string, password []byte) (bool, string) {
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Println(err)
@@ -23,7 +23,6 @@ func SignUpGRPC(email, username string, password []byte) (bool, string) {
 	defer cancel()
 
 	resp, err := client.SignUp(ctx, &pb.SignUpRequest{
-		Email:    email,
 		Username: username,
 		Password: string(password),
 	})
